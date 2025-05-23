@@ -1,0 +1,138 @@
+/* Contenedor principal centrado y con padding */
+.admin-container {
+  max-width: 600px; /* Similar al max-width del grid */
+  width: 60%;       /* Coincide con el ancho del grid-wrapper */
+  margin: 40px auto; /* Centrado horizontal con margen superior e inferior */
+  padding: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background-color: #f9fafb; /* Fondo muy suave */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Botones estilo general, igual que en grid */
+.admin-container .btn {
+  width: 100%;              /* Botones toman todo el ancho del contenedor */
+  padding: 10px 0;
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  text-align: center;
+}
+
+/* Botón normal */
+.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline) {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+}
+.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline):hover {
+  background-color: #2563eb;
+}
+
+/* Botón warning */
+.admin-container .btn.btn-warning {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+}
+.admin-container .btn.btn-warning:hover {
+  background-color: #b45309;
+}
+
+/* Botón success */
+.admin-container .btn.btn-success {
+  background-color: #10b981;
+  color: white;
+  border: none;
+}
+.admin-container .btn.btn-success:hover {
+  background-color: #047857;
+}
+
+/* Botón error */
+.admin-container .btn.btn-error {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+}
+.admin-container .btn.btn-error:hover {
+  background-color: #b91c1c;
+}
+
+/* Botón outline */
+.admin-container .btn.btn-outline {
+  background-color: transparent;
+  border: 2px solid #3b82f6;
+  color: #3b82f6;
+}
+.admin-container .btn.btn-outline:hover {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* Input de contraseña */
+.admin-container input[type="password"] {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.admin-container input[type="password"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+}
+
+/* Mensaje de error */
+.admin-container p.text-red-600 {
+  font-size: 0.9rem;
+  color: #dc2626;
+  margin: 0;
+  text-align: center;
+}
+
+/* Espaciado entre grupos */
+.admin-container .mt-2 {
+  margin-top: 8px;
+}
+
+.admin-container .mt-4 {
+  margin-top: 16px;
+}
+
+.admin-container .mt-1 {
+  margin-top: 4px;
+}
+
+/* Espaciado vertical entre botones */
+.admin-container .space-y-3 > * + * {
+  margin-top: 12px;
+}
+
+/* Responsivo para pantallas pequeñas */
+@media (max-width: 640px) {
+  .admin-container {
+    width: 90%;
+    max-width: none;
+    margin: 20px auto;
+    padding: 12px;
+  }
+
+  .admin-container .btn {
+    font-size: 0.95rem;
+    padding: 10px 0;
+  }
+}

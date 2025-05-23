@@ -1,0 +1,48 @@
+.title-section {
+  width: 60%;          /* Igual que grid-wrapper y admin-container */
+  max-width: 600px;
+  min-width: 320px;
+  margin: 40px auto 24px auto; /* Centrado horizontal con margen arriba y abajo */
+  text-align: center;
+  padding: 0 12px;
+  box-sizing: border-box;
+  color: #374151;      /* Color de texto gris oscuro para buen contraste */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title-section h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 2rem;
+  color: #1f2937;  /* Texto un poco más oscuro para el título */
+}
+
+.title-section p {
+  margin: 0;
+  font-weight: 400;
+  font-size: 1.125rem;
+  color: #4b5563;  /* Gris medio para descripción */
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 640px) {
+  .title-section {
+    width: 90%;
+    margin: 30px auto 16px auto;
+  }
+
+  .title-section h1 {
+    font-size: 1.5rem;
+  }
+
+  .title-section p {
+    font-size: 1rem;
+  }
+}

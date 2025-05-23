@@ -1,0 +1,28 @@
+<main class="grid-page">
+  <div class="grid-wrapper">
+    <h2>Selecciona números para asignar</h2>
+
+    <div class="grid-container">
+      <div
+        *ngFor="let cell of (numbers$ | async)"
+        class="number-cell"
+        [class.blocked]="cell.blocked"
+        [class.selected]="cell.selected"
+        [class.paid]="cell.paid"
+        (click)="toggleSelect(cell)"
+        [title]="cell.blocked ? 'Asignado a ' + cell.assignedTo : 'Número ' + cell.number"
+      >
+        <div>{{ cell.number }}</div>
+        <div class="assigned-name" *ngIf="cell.assignedTo">{{ cell.assignedTo }}</div>
+      </div>
+    </div>
+
+    <button
+      *ngIf="selectedUnblockedExist()"
+      (click)="assignSelected()"
+      class="assign-button"
+    >
+      Asignar número{{ selectedUnblockedCount() > 1 ? 's' : '' }}
+    </button>
+  </div>
+</main>
