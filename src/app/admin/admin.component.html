@@ -19,16 +19,23 @@
   </div>
 
   <!-- Opciones de administrador -->
-  <div *ngIf="loggedIn" class="mt-4 space-y-3">
-    <p class="font-semibold text-green-700">¡Administrador activo!</p>
+  <div *ngIf="loggedIn" class="mt-4">
+    <p class="font-semibold text-green-700 admin-status">¡Administrador activo!</p>
 
-    <!-- Botones para acciones de admin -->
-    <button (click)="changeTitle()" class="btn btn-sm w-full">Editar título</button>
-    <button (click)="changeDescription()" class="btn btn-sm w-full">Editar descripción</button>
-    <button (click)="resetAll()" class="btn btn-sm btn-warning w-full">Resetear sorteo completo</button>
-    <button (click)="markPaid()" class="btn btn-sm btn-success w-full">Marcar números como pagados</button>
-    <button (click)="unassign()" class="btn btn-sm btn-error w-full">Desasignar números</button>
+    <div class="admin-actions">
+      <!-- Botones principales -->
+      <div class="top-buttons">
+        <button (click)="changeTitle()" class="btn btn-sm w-full">Editar título</button>
+        <button (click)="changeDescription()" class="btn btn-sm w-full">Editar descripción</button>
+        <button (click)="markPaid()" class="btn btn-sm btn-success w-full">Marcar pagados</button>
+        <button (click)="unassign()" class="btn btn-sm btn-error w-full">Desasignar</button>
+      </div>
 
-    <button (click)="logout()" class="btn btn-sm btn-outline w-full mt-4">Cerrar sesión</button>
+      <!-- Botones inferiores -->
+      <div class="bottom-buttons mt-4">
+        <button (click)="resetAll()" class="btn btn-sm btn-warning w-full">Resetear sorteo completo</button>
+        <button (click)="logout()" class="btn btn-sm btn-outline w-full">Cerrar sesión</button>
+      </div>
+    </div>
   </div>
 </div>

@@ -1,149 +1,432 @@
-/* Centra toda la página del grid */
+/* Centra toda la página del grid - Mobile First */
 .grid-page {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 40px 20px;
+  padding: 16px 8px;
   width: 100%;
+  min-height: 100vh;
   box-sizing: border-box;
+  background-color: #f9fafb;
 }
 
-/* Contiene título, grid y botón, todos centrados */
+/* Contiene título, grid y botón */
 .grid-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  width: 60%; /* 3/5 del ancho de la pantalla */
-  max-width: 600px;
-  min-width: 320px;
+  width: 90%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0 4px;
+  box-sizing: border-box;
 }
 
-/* Título centrado */
 .grid-wrapper h2 {
   margin: 0;
   text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  padding: 0 8px;
+  line-height: 1.3;
+  word-break: break-word;
 }
 
-/* Cuadrícula de números */
+/* Cuadrícula de números - Mobile First */
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 8px;
-  width: 200%;
-  aspect-ratio: 10 / 1; /* 10 columnas cuadradas con aspect-ratio 1:1 */
-  margin-bottom: 24px; /* Espacio fijo con el botón */
-}
-
-/* Celda individual moderna */
-.number-cell {
-  aspect-ratio: 1 / 1; /* Cuadrado perfecto */
-  background-color: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  font-weight: 600;
-  font-size: 0.95rem;
-  text-align: center;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.3s ease, border 0.3s ease, transform 0.2s ease;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 4px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 20px;
+  padding: 12px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
   overflow: hidden;
 }
 
-/* Hover (excepto bloqueados) */
-.number-cell:not(.blocked):hover {
-  background-color: #e0f2fe;
-  transform: translateY(-1px);
+.number-cell {
+  aspect-ratio: 1 / 1;
+  background-color: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  min-height: 64px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Seleccionado */
+.number-cell:not(.blocked):hover,
+.number-cell:not(.blocked):active {
+  background-color: #dbeafe;
+  border-color: #3b82f6;
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
 .number-cell.selected {
   background-color: #4caf50;
   color: white;
   border-color: #388e3c;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
-/* Bloqueado */
 .number-cell.blocked {
-  background-color: #9ca3af;
-  color: #f3f4f6;
+  background-color: #e5e7eb;
+  color: #6b7280;
   cursor: default;
-  border-color: #6b7280;
+  border-color: #9ca3af;
 }
 
-/* Pagado */
 .number-cell.paid {
   background-color: #10b981;
   color: white;
   border-color: #059669;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
-/* Seleccionado + bloqueado (admin) */
 .number-cell.blocked.selected {
-  background-color: #d8b4fe;
-  border: 2px solid #7e22ce;
+  background-color: #a855f7;
+  border: 2px solid #7c3aed;
   color: #fff;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
 }
 
-/* Nombre asignado */
 .assigned-name {
-  font-size: 0.65em;
+  font-size: 0.6rem;
   line-height: 1.1;
-  margin-top: 2px;
-  color: #f9fafb;
-  opacity: 0.85;
-  text-align: center;
-  word-break: break-word;
   white-space: normal;
   display: -webkit-box;
-
-  /* Añadimos la propiedad estándar */
+  display: box;
   line-clamp: 2;
   -webkit-line-clamp: 2;
-  
   -webkit-box-orient: vertical;
+  box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  position: static;
+  margin-top: 2px;
 }
 
-/* Botón de asignar */
 .assign-button {
+  width: 100%;
+  max-width: 300px;
   margin-top: 0;
-  padding: 10px 20px;
+  padding: 14px 20px;
   font-size: 1rem;
-  border-radius: 8px;
+  border-radius: 12px;
   font-weight: 600;
   background-color: #3b82f6;
   color: white;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.assign-button:hover {
+.assign-button:hover,
+.assign-button:active {
   background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-/* Responsive: para pantallas pequeñas */
-@media (max-width: 640px) {
+.assign-button:active {
+  transform: translateY(0);
+}
+
+/* Tablet pequeña - 480px y mayor */
+@media (min-width: 480px) and (max-width: 639px) {
+  .grid-page {
+    padding: 20px 12px;
+  }
+
   .grid-wrapper {
+    padding: 0 8px;
     width: 90%;
+    max-width: 700px;
+    gap: 18px;
+  }
+
+  .grid-wrapper h2 {
+    font-size: 1.375rem;
   }
 
   .grid-container {
     grid-template-columns: repeat(5, 1fr);
-    aspect-ratio: 5 / 1; /* mantiene casillas cuadradas en responsive */
+  }
+
+  .number-cell {
+    font-size: 0.9rem;
+    min-height: 72px;
+  }
+
+  .assigned-name {
+    font-size: 0.7rem;
   }
 
   .assign-button {
-    width: 100%;
+    font-size: 1.05rem;
+    padding: 15px 24px;
   }
+}
+
+/* Tablet - 640px a 767px */
+@media (min-width: 640px) and (max-width: 767px) {
+  .grid-wrapper {
+    width: 85%;
+    max-width: 750px;
+    gap: 20px;
+    padding: 0 10px;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+
+  .number-cell {
+    font-size: 0.9rem;
+    min-height: 75px;
+  }
+}
+
+/* Ajuste intermedio 768px - 1023px: iPads y tablets grandes */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .grid-wrapper {
+    width: 85%;
+    max-width: 900px;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    width: 95%;
+  }
+
+  .number-cell {
+    font-size: 0.95rem;
+    min-height: 75px;
+  }
+}
+
+/* Tablet - 640px y mayor (resto de reglas) */
+@media (min-width: 640px) {
+  .grid-page {
+    padding: 30px 20px;
+  }
+
+  .grid-wrapper {
+    gap: 20px;
+    width: 85%;
+    max-width: 500px;
+  }
+
+  .grid-wrapper h2 {
+    font-size: 1.5rem;
+  }
+
+  .grid-container {
+    gap: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    width: 95%;
+  }
+
+  .number-cell {
+    font-size: 0.95rem;
+    min-height: 80px;
+  }
+
+  .assigned-name {
+    font-size: 0.75rem;
+  }
+
+  .assign-button {
+    width: auto;
+    min-width: 200px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    min-height: 44px;
+  }
+}
+
+/* Desktop - 1024px y mayor */
+@media (min-width: 1024px) {
+  .grid-page {
+    padding: 40px 20px;
+  }
+
+  .grid-wrapper {
+    width: 75%;
+    max-width: none;
+    gap: 24px;
+  }
+
+  .grid-wrapper h2 {
+    font-size: 1.75rem;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(10, 1fr);
+    gap: 14px;
+    padding: 20px;
+  }
+
+  .number-cell {
+    font-size: 1rem;
+    min-height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  .assigned-name {
+    font-size: 0.8rem;
+    margin-top: 3px;
+  }
+
+  .assign-button {
+    padding: 10px 20px;
+    min-height: 40px;
+  }
+}
+
+/* Desktop grande - 1440px y mayor */
+@media (min-width: 1440px) {
+  .grid-wrapper {
+    width: 75%;
+    max-width: none;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(10, 1fr);
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .number-cell {
+    font-size: 1.05rem;
+    min-height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  .assigned-name {
+    font-size: 0.85rem;
+  }
+}
+
+/* Orientación landscape en móviles */
+@media (max-width: 926px) and (orientation: landscape) {
+  .grid-page {
+    padding: 12px 8px;
+  }
+
+  .grid-wrapper {
+    gap: 12px;
+  }
+
+  .grid-wrapper h2 {
+    font-size: 1.125rem;
+  }
+
+  .grid-container {
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 16px;
+  }
+
+  .number-cell {
+    font-size: 0.75rem;
+    min-height: 60px;
+  }
+
+  .assigned-name {
+    font-size: 0.6rem;
+  }
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .grid-page {
+    background-color: #111827;
+  }
+
+  .grid-wrapper h2 {
+    color: #f9fafb;
+  }
+
+  .grid-container {
+    background-color: #1f2937;
+  }
+
+  .number-cell {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #e5e7eb;
+  }
+
+  .number-cell:not(.blocked):hover {
+    background-color: #4b5563;
+    border-color: #60a5fa;
+  }
+
+  .number-cell.blocked {
+    background-color: #4b5563;
+    color: #9ca3af;
+  }
+}
+
+/* Alto contraste */
+@media (prefers-contrast: high) {
+  .number-cell {
+    border-width: 2px;
+  }
+
+  .number-cell.selected,
+  .number-cell.paid {
+    border-width: 3px;
+  }
+}
+
+/* Reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .number-cell,
+  .assign-button {
+    transition: background-color 0.2s ease;
+    transform: none !important;
+  }
+
+  .number-cell:hover,
+  .assign-button:hover {
+    transform: none !important;
+  }
+}
+
+/* Estados de carga */
+.grid-container:empty::after {
+  content: "Cargando números...";
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-style: italic;
 }

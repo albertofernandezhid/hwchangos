@@ -1,138 +1,327 @@
-/* Contenedor principal centrado y con padding */
-.admin-container {
-  max-width: 600px; /* Similar al max-width del grid */
-  width: 60%;       /* Coincide con el ancho del grid-wrapper */
-  margin: 40px auto; /* Centrado horizontal con margen superior e inferior */
-  padding: 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  background-color: #f9fafb; /* Fondo muy suave */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/* Reset y base */
+* {
   box-sizing: border-box;
+}
+
+/* Contenedor principal - Mobile First */
+.admin-container {
+  width: 95%;
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 16px;
 }
 
-/* Botones estilo general, igual que en grid */
+/* Botones - Base mobile */
 .admin-container .btn {
-  width: 100%;              /* Botones toman todo el ancho del contenedor */
-  padding: 10px 0;
+  width: 100%;
+  padding: 14px 16px;
   font-weight: 600;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 12px;
+  font-size: 16px;
   cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s ease;
+  border: none;
+  transition: all 0.2s ease;
   text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Botón normal */
+/* Botón primario */
 .admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline) {
   background-color: #3b82f6;
   color: white;
-  border: none;
-}
-.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline):hover {
-  background-color: #2563eb;
 }
 
-/* Botón warning */
+.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline):hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline):active {
+  transform: translateY(0);
+}
+
+/* Variantes de botones */
 .admin-container .btn.btn-warning {
   background-color: #f59e0b;
   color: white;
-  border: none;
-}
-.admin-container .btn.btn-warning:hover {
-  background-color: #b45309;
 }
 
-/* Botón success */
+.admin-container .btn.btn-warning:hover {
+  background-color: #d97706;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
 .admin-container .btn.btn-success {
   background-color: #10b981;
   color: white;
-  border: none;
-}
-.admin-container .btn.btn-success:hover {
-  background-color: #047857;
 }
 
-/* Botón error */
+.admin-container .btn.btn-success:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
 .admin-container .btn.btn-error {
   background-color: #ef4444;
   color: white;
-  border: none;
-}
-.admin-container .btn.btn-error:hover {
-  background-color: #b91c1c;
 }
 
-/* Botón outline */
+.admin-container .btn.btn-error:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
 .admin-container .btn.btn-outline {
   background-color: transparent;
   border: 2px solid #3b82f6;
   color: #3b82f6;
 }
+
 .admin-container .btn.btn-outline:hover {
   background-color: #3b82f6;
   color: white;
+  transform: translateY(-1px);
 }
 
 /* Input de contraseña */
-.admin-container input[type="password"] {
+.admin-container input[type="password"],
+.admin-container .input {
   width: 100%;
-  padding: 8px 12px;
-  font-size: 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease;
+  padding: 14px 16px;
+  font-size: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background-color: #f9fafb;
+  transition: all 0.2s ease;
+  min-height: 48px;
 }
 
-.admin-container input[type="password"]:focus {
+.admin-container input[type="password"]:focus,
+.admin-container .input:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Mensaje de error */
-.admin-container p.text-red-600 {
-  font-size: 0.9rem;
-  color: #dc2626;
-  margin: 0;
+/* Estados y mensajes */
+.admin-container .font-semibold.text-green-700 {
+  font-weight: 600;
+  color: #059669;
   text-align: center;
+  padding: 12px;
+  background-color: #d1fae5;
+  border-radius: 12px;
+  border: 1px solid #a7f3d0;
+  margin: 0 0 12px 0; /* Añadido margen inferior */
 }
 
-/* Espaciado entre grupos */
-.admin-container .mt-2 {
+.admin-container .text-red-600 {
+  font-size: 14px;
+  color: #dc2626;
+  text-align: center;
+  padding: 8px;
+  background-color: #fee2e2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  margin: 8px 0 0 0;
+}
+
+/* Espaciado */
+.admin-container .mt-1 {
   margin-top: 8px;
 }
 
-.admin-container .mt-4 {
-  margin-top: 16px;
-}
-
-.admin-container .mt-1 {
-  margin-top: 4px;
-}
-
-/* Espaciado vertical entre botones */
-.admin-container .space-y-3 > * + * {
+.admin-container .mt-2 {
   margin-top: 12px;
 }
 
-/* Responsivo para pantallas pequeñas */
-@media (max-width: 640px) {
+.admin-container .mt-4 {
+  margin-top: 20px;
+}
+
+.admin-container .w-full {
+  width: 100%;
+}
+
+/* Estados de botones */
+.admin-container .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* NUEVO: Grid para botones admin */
+.admin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-actions .full {
+  width: 100%;
+}
+
+/* NUEVO: separadores de botones */
+.admin-actions .top-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-actions .bottom-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Tablet - 640px a 1023px */
+@media (min-width: 640px) {
   .admin-container {
     width: 90%;
-    max-width: none;
-    margin: 20px auto;
-    padding: 12px;
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 32px;
+    gap: 20px;
   }
 
   .admin-container .btn {
-    font-size: 0.95rem;
-    padding: 10px 0;
+    font-size: 15px;
+    padding: 12px 20px;
+    min-height: 44px;
+  }
+
+  .admin-container input[type="password"],
+  .admin-container .input {
+    font-size: 15px;
+    padding: 12px 16px;
+    min-height: 44px;
+  }
+
+  .admin-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .admin-actions .full {
+    grid-column: 1 / -1;
+  }
+
+  .admin-actions .top-buttons,
+  .admin-actions .bottom-buttons {
+    display: contents;
+  }
+}
+
+/* Desktop - 1024px y mayor */
+@media (min-width: 1024px) {
+  .admin-container {
+    width: 60%;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 40px;
+    gap: 24px;
+  }
+
+  .admin-container .btn {
+    font-size: 14px;
+    padding: 12px 24px;
+    min-height: 40px;
+  }
+
+  .admin-container input[type="password"],
+  .admin-container .input {
+    font-size: 14px;
+    padding: 12px 16px;
+    min-height: 40px;
+  }
+
+  .admin-container .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .admin-actions {
+    gap: 20px;
+  }
+}
+
+/* Pantallas muy grandes - 1440px y mayor */
+@media (min-width: 1440px) {
+  .admin-container {
+    max-width: 700px;
+  }
+}
+
+/* Accesibilidad - Reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .admin-container .btn {
+    transition: background-color 0.2s ease;
+    transform: none !important;
+  }
+
+  .admin-container .btn:hover {
+    transform: none !important;
+  }
+}
+
+/* Alto contraste */
+@media (prefers-contrast: high) {
+  .admin-container {
+    border-width: 2px;
+    border-color: #000;
+  }
+
+  .admin-container .btn {
+    border: 2px solid;
+  }
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .admin-container {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+
+  .admin-container input[type="password"],
+  .admin-container .input {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: white;
+  }
+
+  .admin-container input[type="password"]:focus,
+  .admin-container .input:focus {
+    background-color: #4b5563;
+    border-color: #60a5fa;
+  }
+
+  .admin-container .font-semibold.text-green-700 {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.3);
+  }
+
+  .admin-container .text-red-600 {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
   }
 }
