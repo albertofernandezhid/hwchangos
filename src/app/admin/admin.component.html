@@ -1,40 +1,74 @@
-<div class="admin-container p-4 border rounded max-w-md mx-auto">
+<div class="admin-container">
   <!-- Acceso como admin -->
   <button *ngIf="!loggedIn && !showPasswordInput" (click)="showPasswordInput = true" class="btn">
     Acceder como Admin
   </button>
 
   <!-- Formulario de contraseña -->
-  <div *ngIf="showPasswordInput && !loggedIn" class="mt-2">
+  <div *ngIf="showPasswordInput && !loggedIn" class="password-form mt-2">
     <input
       [(ngModel)]="password"
       type="password"
       placeholder="Introduce contraseña"
-      class="input input-bordered w-full"
+      class="input input-bordered"
       (keyup.enter)="login()"
     />
-    <button (click)="login()" class="btn btn-primary mt-2 w-full">Entrar</button>
-    <button (click)="cancel()" class="btn btn-secondary mt-1 w-full">Cancelar</button>
-    <p *ngIf="error" class="text-red-600 mt-1">{{ error }}</p>
+    <button (click)="login()" class="btn btn-primary">Entrar</button>
+    <button (click)="cancel()" class="btn btn-secondary">Cancelar</button>
+    <p *ngIf="error" class="text-red-600">{{ error }}</p>
   </div>
 
   <!-- Opciones de administrador -->
-  <div *ngIf="loggedIn" class="mt-4">
+  <div *ngIf="loggedIn" class="admin-options mt-4">
+    <!-- Aviso admin activo -->
     <p class="font-semibold text-green-700 admin-status">¡Administrador activo!</p>
 
-    <div class="admin-actions">
-      <!-- Botones principales -->
-      <div class="top-buttons">
-        <button (click)="changeTitle()" class="btn btn-sm w-full">Editar título</button>
-        <button (click)="changeDescription()" class="btn btn-sm w-full">Editar descripción</button>
-        <button (click)="markPaid()" class="btn btn-sm btn-success w-full">Marcar pagados</button>
-        <button (click)="unassign()" class="btn btn-sm btn-error w-full">Desasignar</button>
+    <!-- Sección: Límite de casillas -->
+    <div class="admin-section">
+      <h3 class="section-title">Límite de casillas</h3>
+      <div class="cantidad-section">
+        <label for="cantidad">Cantidad de casillas (10 a 100):</label>
+        <input
+          id="cantidad"
+          type="number"
+          class="input input-bordered"
+          [(ngModel)]="cantidad"
+          [min]="10"
+          [max]="100"
+        />
+        <button (click)="actualizarCantidad()" class="btn btn-primary">Aplicar límite</button>
       </div>
+    </div>
 
-      <!-- Botones inferiores -->
-      <div class="bottom-buttons mt-4">
-        <button (click)="resetAll()" class="btn btn-sm btn-warning w-full">Resetear sorteo completo</button>
-        <button (click)="logout()" class="btn btn-sm btn-outline w-full">Cerrar sesión</button>
+    <!-- Sección: Título, descripción e imagen -->
+    <div class="admin-section">
+      <h3 class="section-title">Contenido del sorteo</h3>
+      <div class="admin-actions top-buttons">
+        <button (click)="changeTitle()" class="btn">Editar título</button>
+        <button (click)="changeDescription()" class="btn">Editar descripción</button>
+        <div class="image-upload">
+          <label>Imagen para mostrar:</label>
+          <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+          <button (click)="uploadImage()" class="btn btn-info">Subir imagen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección: Gestión de números -->
+    <div class="admin-section">
+      <h3 class="section-title">Gestión de números</h3>
+      <div class="admin-actions top-buttons">
+        <button (click)="markPaid()" class="btn btn-success">Marcar pagados</button>
+        <button (click)="unassign()" class="btn btn-error">Desasignar</button>
+      </div>
+    </div>
+
+    <!-- Sección: Reset y cerrar sesión -->
+    <div class="admin-section">
+      <h3 class="section-title">Seguridad</h3>
+      <div class="admin-actions bottom-buttons">
+        <button (click)="resetAll()" class="btn btn-warning">Resetear sorteo completo</button>
+        <button (click)="logout()" class="btn btn-outline">Cerrar sesión</button>
       </div>
     </div>
   </div>

@@ -14,6 +14,13 @@ export class TitleDescriptionComponent {
 
   title$ = this.state.title$;
   description$ = this.state.description$;
+  imageUrl: string | null = null;
+
+  constructor() {
+    this.state.image$.subscribe((url: string) => {
+      this.imageUrl = url;
+    });
+  }
 
   updateTitle() {
     const newTitle = prompt('Nuevo título:');

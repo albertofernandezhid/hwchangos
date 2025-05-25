@@ -1,7 +1,7 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StateService, NumberCell } from '../state.service';
-import { firstValueFrom } from 'rxjs';
+import { combineLatest, firstValueFrom, map } from 'rxjs';
 
 @Component({
   selector: 'app-number-grid',
@@ -13,7 +13,14 @@ import { firstValueFrom } from 'rxjs';
 export class NumberGridComponent {
   private state = inject(StateService);
 
-  numbers$ = this.state.numbers$;
+  // Limita el número de casillas mostradas según la configuración del admin
+  numbers$ = combineLatest([
+    this.state.numbers$,
+    this.state.cantidad$
+  ]).pipe(
+    map(([numbers, cantidad]) => numbers.slice(0, cantidad))
+  );
+
   adminMode$ = this.state.adminMode$;
 
   selectedUnblockedCount = signal(0);
@@ -37,8 +44,7 @@ export class NumberGridComponent {
     if (cell.blocked && !this.isAdmin()) return;
 
     // Obtener snapshot actual de números
-    const numbers = await firstValueFrom(this.numbers$);
-
+    const numbers = await firstValueFrom(this.state.numbers$); // NOTA: usamos el stream completo aquí
     const selected = numbers.filter(n => n.selected);
     const isMixed = selected.length > 0 &&
       selected.some(n => n.blocked !== cell.blocked);
@@ -55,7 +61,7 @@ export class NumberGridComponent {
   }
 
   async assignSelected() {
-    const current = await firstValueFrom(this.numbers$);
+    const current = await firstValueFrom(this.state.numbers$); // usamos todos, no solo los visibles
     const selected = current.filter(c => c.selected && !c.blocked);
     if (selected.length === 0) return;
 

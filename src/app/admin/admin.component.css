@@ -98,7 +98,7 @@
   transform: translateY(-1px);
 }
 
-/* Input de contraseña */
+/* Input de contraseña e inputs generales */
 .admin-container input[type="password"],
 .admin-container .input {
   width: 100%;
@@ -128,7 +128,7 @@
   background-color: #d1fae5;
   border-radius: 12px;
   border: 1px solid #a7f3d0;
-  margin: 0 0 12px 0; /* Añadido margen inferior */
+  margin: 0 0 12px 0;
 }
 
 .admin-container .text-red-600 {
@@ -178,17 +178,47 @@
 }
 
 /* NUEVO: separadores de botones */
-.admin-actions .top-buttons {
+.admin-actions .top-buttons,
+.admin-actions .bottom-buttons {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.admin-actions .bottom-buttons {
+/* NUEVO: sección agrupada */
+.admin-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+  margin-top: 12px;
+}
+
+/* NUEVO: título de sección */
+.section-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+/* NUEVO: sección para input de cantidad */
+.cantidad-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* NUEVO: input de imagen */
+.image-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.image-upload input[type="file"] {
+  padding: 6px 0;
 }
 
 /* Tablet - 640px a 1023px */
@@ -227,6 +257,11 @@
   .admin-actions .top-buttons,
   .admin-actions .bottom-buttons {
     display: contents;
+  }
+
+  .cantidad-section,
+  .image-upload {
+    grid-column: 1 / -1;
   }
 }
 
@@ -324,4 +359,15 @@
     color: #f87171;
     border-color: rgba(248, 113, 113, 0.3);
   }
+
+  .section-title {
+    color: #e5e7eb;
+  }
+}
+
+/* Separación vertical dentro del formulario de contraseña */
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
