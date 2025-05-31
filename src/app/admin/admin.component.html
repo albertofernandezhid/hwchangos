@@ -1,32 +1,81 @@
 <div class="admin-container">
   <!-- Acceso como admin -->
-  <button *ngIf="!loggedIn && !showPasswordInput" (click)="showPasswordInput = true" class="btn">
+  <button
+    *ngIf="!loggedIn && !showPasswordInput"
+    (click)="showPasswordInput = true"
+    class="btn"
+  >
     Acceder como Admin
   </button>
 
   <!-- Formulario de contraseña -->
-  <div *ngIf="showPasswordInput && !loggedIn" class="password-form mt-2">
+  <div *ngIf="showPasswordInput && !loggedIn" class="password-form margin-top-medium">
     <input
       [(ngModel)]="password"
       type="password"
       placeholder="Introduce contraseña"
       class="input input-bordered"
       (keyup.enter)="login()"
+      autocomplete="off"
+      aria-label="Contraseña de administrador"
     />
-    <button (click)="login()" class="btn btn-primary">Entrar</button>
-    <button (click)="cancel()" class="btn btn-secondary">Cancelar</button>
-    <p *ngIf="error" class="text-red-600">{{ error }}</p>
+    <div class="button-row margin-top-small">
+      <button (click)="login()" class="btn btn-primary margin-right-small">Entrar</button>
+      <button (click)="cancel()" class="btn btn-secondary">Cancelar</button>
+    </div>
+
+    <div class="margin-top-large">
+      <button (click)="toggleResetPasswordInput()" class="btn btn-accent">
+        Reset admin pass
+      </button>
+    </div>
+
+    <!-- Paso 1: input para introducir contraseña maestra -->
+    <div *ngIf="showResetPasswordMasterInput" class="margin-top-large">
+      <input
+        [(ngModel)]="masterPassInput"
+        type="password"
+        placeholder="Contraseña maestra"
+        class="input input-bordered"
+        (keyup.enter)="validateMasterPassword()"
+        autocomplete="off"
+        aria-label="Contraseña maestra"
+      />
+      <div class="button-row margin-top-small">
+        <button (click)="validateMasterPassword()" class="btn btn-primary margin-right-small">Validar</button>
+        <button (click)="cancelResetPassword()" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Paso 2: input para introducir nueva contraseña admin -->
+    <div *ngIf="showResetPasswordNewInput" class="margin-top-large">
+      <input
+        [(ngModel)]="newPassword"
+        type="password"
+        placeholder="Nueva contraseña de admin"
+        class="input input-bordered"
+        (keyup.enter)="confirmNewAdminPassword()"
+        autocomplete="off"
+        aria-label="Nueva contraseña de administrador"
+      />
+      <div class="button-row margin-top-small">
+        <button (click)="confirmNewAdminPassword()" class="btn btn-success margin-right-small">Confirmar</button>
+        <button (click)="cancelResetPassword()" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+
+    <p *ngIf="error" class="text-error margin-top-small">{{ error }}</p>
   </div>
 
   <!-- Opciones de administrador -->
-  <div *ngIf="loggedIn" class="admin-options mt-4">
+  <div *ngIf="loggedIn" class="admin-options margin-top-large">
     <!-- Aviso admin activo -->
-    <p class="font-semibold text-green-700 admin-status">¡Administrador activo!</p>
+    <p class="admin-status">¡Administrador activo!</p>
 
     <!-- Sección: Límite de casillas -->
     <div class="admin-section">
       <h3 class="section-title">Límite de casillas</h3>
-      <div class="cantidad-section">
+      <div class="cantidad-section margin-top-small">
         <label for="cantidad">Cantidad de casillas (10 a 100):</label>
         <input
           id="cantidad"
@@ -36,37 +85,46 @@
           [min]="10"
           [max]="100"
         />
-        <button (click)="actualizarCantidad()" class="btn btn-primary">Aplicar límite</button>
+        <button (click)="actualizarCantidad()" class="btn btn-primary">
+          Aplicar límite
+        </button>
       </div>
     </div>
 
     <!-- Sección: Título, descripción e imagen -->
-    <div class="admin-section">
+    <div class="admin-section margin-top-large">
       <h3 class="section-title">Contenido del sorteo</h3>
-      <div class="admin-actions top-buttons">
-        <button (click)="changeTitle()" class="btn">Editar título</button>
-        <button (click)="changeDescription()" class="btn">Editar descripción</button>
-        <div class="image-upload">
-          <label>Imagen para mostrar:</label>
-          <input type="file" (change)="onFileSelected($event)" accept="image/*" />
-          <button (click)="uploadImage()" class="btn btn-info">Subir imagen</button>
+        <div class="admin-actions button-row margin-top-small">
+          <button (click)="changeTitle()" class="btn">Editar título</button>
+          <button (click)="changeDescription()" class="btn">Editar descripción</button>
         </div>
-      </div>
+        <div class="image-upload margin-top-small">
+          <label>Imagen para mostrar:</label>
+          <input
+            type="file"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            class="file-input"
+          />
+          <button (click)="uploadImage()" class="btn btn-info margin-top-small">
+            Subir imagen
+          </button>
+        </div>
     </div>
 
     <!-- Sección: Gestión de números -->
-    <div class="admin-section">
+    <div class="admin-section margin-top-large">
       <h3 class="section-title">Gestión de números</h3>
-      <div class="admin-actions top-buttons">
+      <div class="admin-actions button-row margin-top-small">
         <button (click)="markPaid()" class="btn btn-success">Marcar pagados</button>
         <button (click)="unassign()" class="btn btn-error">Desasignar</button>
       </div>
     </div>
 
     <!-- Sección: Reset y cerrar sesión -->
-    <div class="admin-section">
-      <h3 class="section-title">Seguridad</h3>
-      <div class="admin-actions bottom-buttons">
+    <div class="admin-section margin-top-large">
+      <h3 class="section-title">Reset y LogOut</h3>
+      <div class="admin-actions button-row margin-top-small">
         <button (click)="resetAll()" class="btn btn-warning">Resetear sorteo completo</button>
         <button (click)="logout()" class="btn btn-outline">Cerrar sesión</button>
       </div>

@@ -1,6 +1,14 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { Firestore, collection, collectionData, doc, updateDoc, setDoc, getDoc } from '@angular/fire/firestore';
+import {
+  Firestore,
+  collection,
+  collectionData,
+  doc,
+  updateDoc,
+  setDoc,
+  getDoc
+} from '@angular/fire/firestore';
 import { map } from 'rxjs/operators';
 
 export interface NumberCell {
@@ -65,26 +73,26 @@ export class StateService {
       const docSnap = await getDoc(configDocRef);
 
       if (!docSnap.exists()) {
-        // Documento no existe, lo creamos con valores por defecto
         await setDoc(configDocRef, {
           title: this.defaultTitle,
           description: this.defaultDescription,
           cantidad: this.defaultCantidad,
           imageUrl: '',
-          adminPassword: this.defaultAdminPassword
+          adminPassword: this.defaultAdminPassword,
+          masterPassword: 'superadmin' // Inicialización si no existe
         });
         this.titleSource.next(this.defaultTitle);
         this.descriptionSource.next(this.defaultDescription);
         this.cantidadSource.next(this.defaultCantidad);
         this.imageSource.next('');
       } else {
-        // Documento existe, actualizamos valores
         const data = docSnap.data() as {
           title?: string;
           description?: string;
           cantidad?: number;
           imageUrl?: string;
           adminPassword?: string;
+          masterPassword?: string;
         };
 
         this.titleSource.next(data.title ?? this.defaultTitle);
@@ -94,9 +102,12 @@ export class StateService {
         const cantidad = Math.max(10, Math.min(100, data.cantidad ?? this.defaultCantidad));
         this.cantidadSource.next(cantidad);
 
-        // Si falta adminPassword, lo agregamos
         if (!data.adminPassword) {
           await setDoc(configDocRef, { adminPassword: this.defaultAdminPassword }, { merge: true });
+        }
+
+        if (!data.masterPassword) {
+          await setDoc(configDocRef, { masterPassword: 'superadmin' }, { merge: true });
         }
       }
     } catch (error) {
@@ -139,9 +150,8 @@ export class StateService {
 
   async setTitle(title: string) {
     this.titleSource.next(title);
-    const configDoc = doc(this.firestore, 'config/general');
     try {
-      await setDoc(configDoc, { title }, { merge: true });
+      await setDoc(doc(this.firestore, 'config/general'), { title }, { merge: true });
     } catch (error) {
       console.error('Error en setTitle:', error);
     }
@@ -149,9 +159,8 @@ export class StateService {
 
   async setDescription(desc: string) {
     this.descriptionSource.next(desc);
-    const configDoc = doc(this.firestore, 'config/general');
     try {
-      await setDoc(configDoc, { description: desc }, { merge: true });
+      await setDoc(doc(this.firestore, 'config/general'), { description: desc }, { merge: true });
     } catch (error) {
       console.error('Error en setDescription:', error);
     }
@@ -159,9 +168,8 @@ export class StateService {
 
   async setImageUrl(url: string) {
     this.imageSource.next(url);
-    const configDoc = doc(this.firestore, 'config/general');
     try {
-      await setDoc(configDoc, { imageUrl: url }, { merge: true });
+      await setDoc(doc(this.firestore, 'config/general'), { imageUrl: url }, { merge: true });
     } catch (error) {
       console.error('Error en setImageUrl:', error);
     }
@@ -169,9 +177,8 @@ export class StateService {
 
   async deleteImageUrl() {
     this.imageSource.next('');
-    const configDoc = doc(this.firestore, 'config/general');
     try {
-      await setDoc(configDoc, { imageUrl: '' }, { merge: true });
+      await setDoc(doc(this.firestore, 'config/general'), { imageUrl: '' }, { merge: true });
     } catch (error) {
       console.error('Error en deleteImageUrl:', error);
     }
@@ -188,8 +195,7 @@ export class StateService {
 
       for (const n of currentNumbers) {
         if (!n.id) continue;
-        const numberDoc = doc(this.firestore, `numeros/${n.id}`);
-        await updateDoc(numberDoc, {
+        await updateDoc(doc(this.firestore, `numeros/${n.id}`), {
           assignedTo: '',
           blocked: false,
           selected: false,
@@ -203,8 +209,7 @@ export class StateService {
 
   async updateNumber(id: string, data: Partial<NumberCell>) {
     try {
-      const numberDoc = doc(this.firestore, `numeros/${id}`);
-      await updateDoc(numberDoc, data);
+      await updateDoc(doc(this.firestore, `numeros/${id}`), data);
     } catch (error) {
       console.error(`Error en updateNumber para id=${id}:`, error);
     }
@@ -245,24 +250,43 @@ export class StateService {
   async setCantidad(valor: number) {
     const cantidad = Math.max(10, Math.min(100, valor));
     this.cantidadSource.next(cantidad);
-    const configDoc = doc(this.firestore, 'config/general');
     try {
-      await setDoc(configDoc, { cantidad }, { merge: true });
+      await setDoc(doc(this.firestore, 'config/general'), { cantidad }, { merge: true });
     } catch (error) {
       console.error('Error en setCantidad:', error);
     }
   }
 
-  // ✅ Nuevo método para obtener la contraseña del admin desde Firestore
   async getAdminPassword(): Promise<string> {
-    const configDoc = doc(this.firestore, 'config/general');
     try {
-      const snapshot = await getDoc(configDoc);
+      const snapshot = await getDoc(doc(this.firestore, 'config/general'));
       const data = snapshot.exists() ? snapshot.data() : {};
       return data['adminPassword'] ?? this.defaultAdminPassword;
     } catch (error) {
       console.error('Error al obtener la contraseña de administrador:', error);
       return this.defaultAdminPassword;
+    }
+  }
+
+  // ✅ Validar contraseña maestra desde Firestore (CORREGIDO)
+  async validateMasterPassword(masterPass: string): Promise<boolean> {
+    try {
+      const snapshot = await getDoc(doc(this.firestore, 'config/general'));
+      const data = snapshot.exists() ? snapshot.data() : {};
+      const storedMasterPassword = data['masterPassword'];
+      return storedMasterPassword && masterPass === storedMasterPassword;
+    } catch (error) {
+      console.error('Error al validar contraseña maestra:', error);
+      return false;
+    }
+  }
+
+  // ✅ Establecer una nueva contraseña de administrador
+  async setAdminPassword(newPassword: string): Promise<void> {
+    try {
+      await setDoc(doc(this.firestore, 'config/general'), { adminPassword: newPassword }, { merge: true });
+    } catch (error) {
+      console.error('Error al establecer nueva contraseña de administrador:', error);
     }
   }
 }

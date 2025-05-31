@@ -37,18 +37,18 @@
 }
 
 /* Botón primario */
-.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline) {
+.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline):not(.btn-info):not(.btn-secondary):not(.btn-accent) {
   background-color: #3b82f6;
   color: white;
 }
 
-.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline):hover {
+.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline):not(.btn-info):not(.btn-secondary):not(.btn-accent):hover {
   background-color: #2563eb;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline):active {
+.admin-container .btn:not(.btn-warning):not(.btn-success):not(.btn-error):not(.btn-outline):not(.btn-info):not(.btn-secondary):not(.btn-accent):active {
   transform: translateY(0);
 }
 
@@ -98,9 +98,44 @@
   transform: translateY(-1px);
 }
 
-/* Input de contraseña e inputs generales */
+.admin-container .btn.btn-info {
+  background-color: #0ea5e9;
+  color: white;
+}
+
+.admin-container .btn.btn-info:hover {
+  background-color: #0284c7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.admin-container .btn.btn-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.admin-container .btn.btn-secondary:hover {
+  background-color: #4b5563;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.admin-container .btn.btn-accent {
+  background-color: #8b5cf6;
+  color: white;
+}
+
+.admin-container .btn.btn-accent:hover {
+  background-color: #7c3aed;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* Inputs */
 .admin-container input[type="password"],
-.admin-container .input {
+.admin-container .input,
+.admin-container input[type="number"],
+.admin-container input[type="file"] {
   width: 100%;
   padding: 14px 16px;
   font-size: 16px;
@@ -112,17 +147,30 @@
 }
 
 .admin-container input[type="password"]:focus,
-.admin-container .input:focus {
+.admin-container .input:focus,
+.admin-container input[type="number"]:focus,
+.admin-container input[type="file"]:focus {
   outline: none;
   border-color: #3b82f6;
   background-color: white;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Estados y mensajes */
-.admin-container .font-semibold.text-green-700 {
-  font-weight: 600;
+/* Mensajes de estado */
+.text-error {
+  font-size: 14px;
+  color: #dc2626;
+  text-align: center;
+  padding: 8px;
+  background-color: #fee2e2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  margin-top: 8px;
+}
+
+.admin-status {
   color: #059669;
+  font-weight: 700;
   text-align: center;
   padding: 12px;
   background-color: #d1fae5;
@@ -131,61 +179,29 @@
   margin: 0 0 12px 0;
 }
 
-.admin-container .text-red-600 {
-  font-size: 14px;
-  color: #dc2626;
-  text-align: center;
-  padding: 8px;
-  background-color: #fee2e2;
-  border-radius: 8px;
-  border: 1px solid #fecaca;
-  margin: 8px 0 0 0;
-}
-
-/* Espaciado */
-.admin-container .mt-1 {
+/* Espaciados */
+.margin-top-small {
   margin-top: 8px;
 }
-
-.admin-container .mt-2 {
-  margin-top: 12px;
+.margin-top-medium {
+  margin-top: 16px;
+}
+.margin-top-large {
+  margin-top: 24px;
+}
+.margin-right-small {
+  margin-right: 8px;
 }
 
-.admin-container .mt-4 {
-  margin-top: 20px;
-}
-
-.admin-container .w-full {
-  width: 100%;
-}
-
-/* Estados de botones */
-.admin-container .btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-/* NUEVO: Grid para botones admin */
-.admin-actions {
+/* Layout para grupos de botones */
+.button-row {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
-.admin-actions .full {
-  width: 100%;
-}
-
-/* NUEVO: separadores de botones */
-.admin-actions .top-buttons,
-.admin-actions .bottom-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* NUEVO: sección agrupada */
+/* Sección agrupada */
 .admin-section {
   display: flex;
   flex-direction: column;
@@ -195,7 +211,7 @@
   margin-top: 12px;
 }
 
-/* NUEVO: título de sección */
+/* Título de sección */
 .section-title {
   font-weight: 600;
   font-size: 16px;
@@ -203,14 +219,14 @@
   margin-bottom: 4px;
 }
 
-/* NUEVO: sección para input de cantidad */
+/* Sección para input de cantidad */
 .cantidad-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* NUEVO: input de imagen */
+/* Input de imagen */
 .image-upload {
   display: flex;
   flex-direction: column;
@@ -219,6 +235,27 @@
 
 .image-upload input[type="file"] {
   padding: 6px 0;
+}
+
+/* Formulario de contraseña */
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Opciones de administrador agrupadas */
+.admin-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Botones deshabilitados */
+.admin-container .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
 /* Tablet - 640px a 1023px */
@@ -238,7 +275,9 @@
   }
 
   .admin-container input[type="password"],
-  .admin-container .input {
+  .admin-container .input,
+  .admin-container input[type="number"],
+  .admin-container input[type="file"] {
     font-size: 15px;
     padding: 12px 16px;
     min-height: 44px;
@@ -250,18 +289,15 @@
     gap: 16px;
   }
 
-  .admin-actions .full {
+  .admin-actions .full,
+  .cantidad-section,
+  .image-upload {
     grid-column: 1 / -1;
   }
 
   .admin-actions .top-buttons,
   .admin-actions .bottom-buttons {
     display: contents;
-  }
-
-  .cantidad-section,
-  .image-upload {
-    grid-column: 1 / -1;
   }
 }
 
@@ -282,7 +318,9 @@
   }
 
   .admin-container input[type="password"],
-  .admin-container .input {
+  .admin-container .input,
+  .admin-container input[type="number"],
+  .admin-container input[type="file"] {
     font-size: 14px;
     padding: 12px 16px;
     min-height: 40px;
@@ -294,6 +332,20 @@
 
   .admin-actions {
     gap: 20px;
+  }
+
+  /* Aquí la magia para que los botones de título y descripción estén uno al lado del otro */
+  /* Asumo que esos botones están dentro de un contenedor con clase 'top-buttons' o similar */
+  .admin-actions .top-buttons {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+  }
+
+  /* Para que cada botón no ocupe todo el ancho */
+  .admin-actions .top-buttons > button {
+    flex: 1 1 auto;
+    width: auto;
   }
 }
 
@@ -336,25 +388,29 @@
   }
 
   .admin-container input[type="password"],
-  .admin-container .input {
+  .admin-container .input,
+  .admin-container input[type="number"],
+  .admin-container input[type="file"] {
     background-color: #374151;
     border-color: #4b5563;
     color: white;
   }
 
   .admin-container input[type="password"]:focus,
-  .admin-container .input:focus {
+  .admin-container .input:focus,
+  .admin-container input[type="number"]:focus,
+  .admin-container input[type="file"]:focus {
     background-color: #4b5563;
     border-color: #60a5fa;
   }
 
-  .admin-container .font-semibold.text-green-700 {
+  .admin-status {
     background-color: rgba(16, 185, 129, 0.1);
     color: #34d399;
     border-color: rgba(52, 211, 153, 0.3);
   }
 
-  .admin-container .text-red-600 {
+  .text-error {
     background-color: rgba(239, 68, 68, 0.1);
     color: #f87171;
     border-color: rgba(248, 113, 113, 0.3);
@@ -363,11 +419,4 @@
   .section-title {
     color: #e5e7eb;
   }
-}
-
-/* Separación vertical dentro del formulario de contraseña */
-.password-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }

@@ -5,6 +5,7 @@ import { Firestore } from '@angular/fire/firestore';
 import { TitleDescriptionComponent } from './title-description/title-description.component';
 import { NumberGridComponent } from './number-grid/number-grid.component';
 import { AdminComponent } from './admin/admin.component';
+import { FooterComponent } from './footer/footer.component';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,8 @@ import { AdminComponent } from './admin/admin.component';
     CommonModule,
     TitleDescriptionComponent,
     NumberGridComponent,
-    AdminComponent
+    AdminComponent,
+    FooterComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']

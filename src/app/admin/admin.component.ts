@@ -19,8 +19,18 @@ export class AdminComponent implements OnInit {
   private storage = inject(Storage);
 
   password = '';
+  newPassword = '';
+
+  masterPassInput = '';  // Para pedir la contraseña master
+  masterPassValidated = false; // Si ya validó la masterPass
+
   loggedIn = false;
   showPasswordInput = false;
+
+  // Controla mostrar inputs para reset admin pass
+  showResetPasswordMasterInput = false;
+  showResetPasswordNewInput = false;
+
   error = '';
 
   cantidad = 100;
@@ -57,6 +67,7 @@ export class AdminComponent implements OnInit {
     this.showPasswordInput = false;
     this.password = '';
     this.error = '';
+    this.cancelResetPassword();
   }
 
   async changeTitle() {
@@ -126,5 +137,57 @@ export class AdminComponent implements OnInit {
     const valor = Math.max(10, Math.min(100, this.cantidad));
     this.cantidad = valor;
     this.state.setCantidad(valor);
+  }
+
+  // -- Nuevo flujo para resetear contraseña admin --
+
+  // Mostrar el primer input para pedir master password
+  toggleResetPasswordInput() {
+    this.showResetPasswordMasterInput = true;
+    this.showResetPasswordNewInput = false;
+    this.masterPassInput = '';
+    this.newPassword = '';
+    this.error = '';
+  }
+
+  // Cancelar cualquier paso del reset password
+  cancelResetPassword() {
+    this.showResetPasswordMasterInput = false;
+    this.showResetPasswordNewInput = false;
+    this.masterPassInput = '';
+    this.newPassword = '';
+    this.error = '';
+  }
+
+  // Validar contraseña master
+  async validateMasterPassword() {
+    if (!this.masterPassInput.trim()) {
+      this.error = 'Introduce la contraseña maestra.';
+      return;
+    }
+    const isValid = await this.state.validateMasterPassword(this.masterPassInput.trim());
+    if (!isValid) {
+      this.error = 'Contraseña maestra incorrecta.';
+      return;
+    }
+    this.error = '';
+    this.showResetPasswordMasterInput = false;
+    this.showResetPasswordNewInput = true;
+  }
+
+  // Confirmar nuevo password admin
+  async confirmNewAdminPassword() {
+    if (!this.newPassword.trim()) {
+      this.error = 'Introduce una nueva contraseña.';
+      return;
+    }
+    try {
+      await this.state.setAdminPassword(this.newPassword.trim());
+      alert('Contraseña de administrador actualizada correctamente.');
+      this.cancelResetPassword();
+    } catch (err) {
+      console.error('Error actualizando contraseña:', err);
+      this.error = 'Error al actualizar la contraseña.';
+    }
   }
 }
