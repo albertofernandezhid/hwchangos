@@ -18,7 +18,11 @@ export interface NumberCell {
   selected?: boolean;
   blocked?: boolean;
   paid?: boolean;
+  reservedBy?: string | null;
+  reservedAt?: number | null;
+  reservedUntil?: number | null;
 }
+
 
 @Injectable({
   providedIn: 'root'
@@ -47,6 +51,9 @@ export class StateService {
   private cantidadSource = new BehaviorSubject<number>(this.defaultCantidad);
   cantidad$ = this.cantidadSource.asObservable();
 
+  // Generar ID único por sesión
+  private sessionId = this.generateSessionId();
+
   constructor(private firestore: Firestore) {
     this.numerosCollection = collection(this.firestore, 'numeros');
 
@@ -58,13 +65,20 @@ export class StateService {
           assignedTo: item['assignedTo'] ?? '',
           selected: item['selected'] ?? false,
           blocked: item['blocked'] ?? false,
-          paid: item['paid'] ?? false
+          paid: item['paid'] ?? false,
+          reservedBy: item['reservedBy'] ?? null,
+          reservedAt: item['reservedAt'] ?? null,
+          reservedUntil: item['reservedUntil'] ?? null
         }))
       )
     );
 
     this.initConfig();
     this.ensureNumerosCollectionExists();
+  }
+
+  private generateSessionId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 
   private async initConfig() {
@@ -132,7 +146,10 @@ export class StateService {
           assignedTo: '',
           selected: false,
           blocked: false,
-          paid: false
+          paid: false,
+          reservedBy: null,
+          reservedAt: null,
+          reservedUntil: null
         });
       }
     } catch (error) {
@@ -146,6 +163,65 @@ export class StateService {
 
   setAdminMode(enabled: boolean) {
     this.adminModeSource.next(enabled);
+  }
+
+  getSessionId(): string {
+    return this.sessionId;
+  }
+
+  async reserveNumber(id: string): Promise<boolean> {
+    try {
+      const now = Date.now();
+      const reserveUntil = now + (5 * 60 * 1000); // 5 minutos de reserva
+
+      // Verificar si el número ya está reservado por otro usuario
+      const currentNumbers = await firstValueFrom(this.numbers$);
+      const number = currentNumbers.find(n => n.id === id);
+      
+      if (number?.reservedBy && 
+          number.reservedBy !== this.sessionId && 
+          (number.reservedUntil || 0) > now) {
+        return false; // Ya está reservado por otro usuario
+      }
+
+      await updateDoc(doc(this.firestore, `numeros/${id}`), {
+        reservedBy: this.sessionId,
+        reservedAt: now,
+        reservedUntil: reserveUntil
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error al reservar número:', error);
+      return false;
+    }
+  }
+
+  async releaseNumber(id: string): Promise<void> {
+    try {
+      await updateDoc(doc(this.firestore, `numeros/${id}`), {
+        reservedBy: null,
+        reservedAt: null,
+        reservedUntil: null
+      });
+    } catch (error) {
+      console.error('Error al liberar número:', error);
+    }
+  }
+
+  async releaseAllUserReservations(): Promise<void> {
+    try {
+      const currentNumbers = await firstValueFrom(this.numbers$);
+      const userReserved = currentNumbers.filter(n => n.reservedBy === this.sessionId);
+      
+      for (const number of userReserved) {
+        if (number.id) {
+          await this.releaseNumber(number.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error al liberar todas las reservas:', error);
+    }
   }
 
   async setTitle(title: string) {
@@ -199,7 +275,10 @@ export class StateService {
           assignedTo: '',
           blocked: false,
           selected: false,
-          paid: false
+          paid: false,
+          reservedBy: null,
+          reservedAt: null,
+          reservedUntil: null
         });
       }
     } catch (error) {
@@ -222,7 +301,10 @@ export class StateService {
           assignedTo: '',
           blocked: false,
           selected: false,
-          paid: false
+          paid: false,
+          reservedBy: null,
+          reservedAt: null,
+          reservedUntil: null
         });
       }
     }
@@ -268,7 +350,6 @@ export class StateService {
     }
   }
 
-  // ✅ Validar contraseña maestra desde Firestore (CORREGIDO)
   async validateMasterPassword(masterPass: string): Promise<boolean> {
     try {
       const snapshot = await getDoc(doc(this.firestore, 'config/general'));
@@ -281,7 +362,6 @@ export class StateService {
     }
   }
 
-  // ✅ Establecer una nueva contraseña de administrador
   async setAdminPassword(newPassword: string): Promise<void> {
     try {
       await setDoc(doc(this.firestore, 'config/general'), { adminPassword: newPassword }, { merge: true });

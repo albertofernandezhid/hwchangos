@@ -9,20 +9,33 @@
         [class.blocked]="cell.blocked"
         [class.selected]="cell.selected"
         [class.paid]="cell.paid"
+        [class.temp-blocked]="cell.tempBlocked"
+        [class.reserved-by-me]="cell.reservedBy === state.getSessionId()"
         (click)="toggleSelect(cell)"
-        [title]="cell.blocked ? 'Asignado a ' + cell.assignedTo : 'Número ' + cell.number"
+        [title]="getTitleForCell(cell)"
       >
         <div>{{ cell.number }}</div>
         <div class="assigned-name" *ngIf="cell.assignedTo">{{ cell.assignedTo }}</div>
+        <div class="reservation-info" *ngIf="cell.tempBlocked">
+          <small>En consideración...</small>
+        </div>
       </div>
     </div>
 
-    <button
-      *ngIf="selectedUnblockedExist()"
-      (click)="assignSelected()"
-      class="assign-button"
-    >
-      Asignar número{{ selectedUnblockedCount() > 1 ? 's' : '' }}
-    </button>
+    <div class="button-container" *ngIf="selectedUnblockedExist()">
+      <button
+        (click)="assignSelected()"
+        class="assign-button"
+      >
+        Asignar número{{ selectedUnblockedCount() > 1 ? 's' : '' }}
+      </button>
+
+      <button
+        (click)="clearLocalSelection()"
+        class="assign-button"
+      >
+        Limpiar selección
+      </button>
+    </div>
   </div>
 </main>

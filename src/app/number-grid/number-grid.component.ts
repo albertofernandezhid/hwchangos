@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StateService, NumberCell } from '../state.service';
 import { combineLatest, firstValueFrom, map } from 'rxjs';
@@ -10,15 +10,28 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
   templateUrl: './number-grid.component.html',
   styleUrls: ['./number-grid.component.css']
 })
-export class NumberGridComponent {
-  private state = inject(StateService);
+export class NumberGridComponent implements OnDestroy {
+  state = inject(StateService);
+  private localSelections = new Set<string>(); // Selecciones locales
+  private reservationTimer?: number;
 
-  // Limita el número de casillas mostradas según la configuración del admin
+  // Modificar el observable para incluir lógica de reservas y selecciones locales
   numbers$ = combineLatest([
     this.state.numbers$,
     this.state.cantidad$
   ]).pipe(
-    map(([numbers, cantidad]) => numbers.slice(0, cantidad))
+    map(([numbers, cantidad]) => {
+      const now = Date.now();
+      return numbers.slice(0, cantidad).map(cell => ({
+        ...cell,
+        // Mostrar como seleccionado si está en selecciones locales
+        selected: this.localSelections.has(cell.id || ''),
+        // Marcar como temporalmente bloqueado si está reservado por otro
+        tempBlocked: cell.reservedBy && 
+                    cell.reservedBy !== this.state.getSessionId() && 
+                    (cell.reservedUntil || 0) > now
+      }));
+    })
   );
 
   adminMode$ = this.state.adminMode$;
@@ -28,59 +41,175 @@ export class NumberGridComponent {
   isAdmin = signal(false);
 
   constructor() {
-    // Suscripciones directas para actualizar signals
-    this.numbers$.subscribe((numbers: NumberCell[]) => {
-      const selectedUnblocked = numbers.filter(n => n.selected && !n.blocked);
-      this.selectedUnblockedCount.set(selectedUnblocked.length);
-      this.selectedUnblockedExist.set(selectedUnblocked.length > 0);
-    });
-
+    // Suscripción al modo admin
     this.adminMode$.subscribe((mode: boolean) => {
       this.isAdmin.set(mode);
     });
+
+    // Limpiar reservas al cargar
+    this.state.releaseAllUserReservations();
+    
+    // Configurar limpieza automática cada minuto
+    this.reservationTimer = window.setInterval(() => {
+      this.cleanupExpiredReservations();
+    }, 60000);
+
+    // Inicializar contadores
+    this.updateSelectionCounts();
   }
 
-  async toggleSelect(cell: NumberCell) {
-    if (cell.blocked && !this.isAdmin()) return;
-
-    // Obtener snapshot actual de números
-    const numbers = await firstValueFrom(this.state.numbers$); // NOTA: usamos el stream completo aquí
-    const selected = numbers.filter(n => n.selected);
-    const isMixed = selected.length > 0 &&
-      selected.some(n => n.blocked !== cell.blocked);
-
-    if (!this.isAdmin() && isMixed) return;
-
-    // Cambiar selección solo del número dado
-    const updatedSelected = !cell.selected;
-
-    // Actualizar Firestore con updateNumber para el número toggled
-    if (cell.id) {
-      await this.state.updateNumber(cell.id, { selected: updatedSelected });
+  ngOnDestroy() {
+    // Limpiar reservas al salir
+    this.state.releaseAllUserReservations();
+    
+    if (this.reservationTimer) {
+      clearInterval(this.reservationTimer);
     }
   }
 
+  async toggleSelect(cell: any) {
+    if (cell.blocked || cell.tempBlocked) return;
+    if (!this.isAdmin() && await this.hasMixedSelection(cell)) return;
+
+    const cellId = cell.id || '';
+    
+    if (this.localSelections.has(cellId)) {
+      // Deseleccionar: remover de selecciones locales y liberar reserva
+      this.localSelections.delete(cellId);
+      await this.state.releaseNumber(cellId);
+    } else {
+      // Seleccionar: intentar reservar primero
+      const reserved = await this.state.reserveNumber(cellId);
+      if (reserved) {
+        this.localSelections.add(cellId);
+      } else {
+        alert('Este número está siendo considerado por otro usuario. Inténtalo de nuevo en unos minutos.');
+      }
+    }
+    
+    this.updateSelectionCounts();
+  }
+
   async assignSelected() {
-    const current = await firstValueFrom(this.state.numbers$); // usamos todos, no solo los visibles
-    const selected = current.filter(c => c.selected && !c.blocked);
-    if (selected.length === 0) return;
+    if (this.localSelections.size === 0) return;
 
     const name = prompt('Introduce el nombre para asignar a los números seleccionados:');
     if (!name || name.trim() === '') {
       alert('Nombre inválido.');
       return;
     }
-    const trimmed = name.trim();
 
-    // Para cada seleccionado actualizar firestore
-    for (const c of selected) {
-      if (c.id) {
-        await this.state.updateNumber(c.id, {
-          assignedTo: trimmed,
-          blocked: true,
-          selected: false
-        });
+    const trimmed = name.trim();
+    const selectedIds = Array.from(this.localSelections);
+
+    // Verificar que todas las reservas siguen activas
+    const current = await firstValueFrom(this.state.numbers$);
+    const now = Date.now();
+    const sessionId = this.state.getSessionId();
+    
+    for (const id of selectedIds) {
+      const number = current.find(n => n.id === id);
+      if (!number || 
+          number.blocked || 
+          (number.reservedBy !== sessionId) ||
+          (number.reservedUntil || 0) <= now) {
+        alert('Algunos números ya no están disponibles. Por favor, revisa tu selección.');
+        // Limpiar selecciones locales y reservas
+        this.localSelections.clear();
+        await this.state.releaseAllUserReservations();
+        this.updateSelectionCounts();
+        return;
       }
+    }
+
+    // Asignar números
+    for (const id of selectedIds) {
+      await this.state.updateNumber(id, {
+        assignedTo: trimmed,
+        blocked: true,
+        selected: false,
+        reservedBy: null,
+        reservedAt: null,
+        reservedUntil: null
+      });
+    }
+
+    // Limpiar selecciones locales
+    this.localSelections.clear();
+    this.updateSelectionCounts();
+  }
+
+  clearLocalSelection() {
+    // Liberar todas las reservas del usuario
+    this.state.releaseAllUserReservations();
+    
+    // Limpiar selecciones locales
+    this.localSelections.clear();
+    this.updateSelectionCounts();
+  }
+
+  getTitleForCell(cell: any): string {
+    if (cell.blocked) {
+      return `Asignado a ${cell.assignedTo}`;
+    }
+    if (cell.tempBlocked) {
+      return 'Este número está siendo considerado por otro usuario';
+    }
+    if (cell.reservedBy === this.state.getSessionId()) {
+      return `Número ${cell.number} - Reservado por ti`;
+    }
+    return `Número ${cell.number}`;
+  }
+
+  private updateSelectionCounts() {
+    const count = this.localSelections.size;
+    this.selectedUnblockedCount.set(count);
+    this.selectedUnblockedExist.set(count > 0);
+  }
+
+  private async hasMixedSelection(newCell: any): Promise<boolean> {
+    if (this.localSelections.size === 0) return false;
+    
+    // Obtener los números actuales para verificar el estado de los seleccionados
+    const numbers = await firstValueFrom(this.state.numbers$);
+    const selectedNumbers = numbers.filter(n => this.localSelections.has(n.id || ''));
+    
+    // Verificar si hay mezcla entre bloqueados y no bloqueados
+    const hasBlocked = selectedNumbers.some(n => n.blocked);
+    const hasUnblocked = selectedNumbers.some(n => !n.blocked);
+    const newCellBlocked = newCell.blocked;
+    
+    return (hasBlocked && !newCellBlocked) || (hasUnblocked && newCellBlocked);
+  }
+
+  private async cleanupExpiredReservations() {
+    // Limpiar reservas expiradas del usuario actual
+    const now = Date.now();
+    const toRemove: string[] = [];
+    
+    try {
+      const current = await firstValueFrom(this.state.numbers$);
+      
+      for (const cellId of this.localSelections) {
+        const number = current.find(n => n.id === cellId);
+        
+        if (!number || 
+            (number.reservedBy !== this.state.getSessionId()) ||
+            (number.reservedUntil || 0) <= now) {
+          toRemove.push(cellId);
+        }
+      }
+      
+      for (const id of toRemove) {
+        this.localSelections.delete(id);
+        await this.state.releaseNumber(id);
+      }
+      
+      if (toRemove.length > 0) {
+        this.updateSelectionCounts();
+      }
+    } catch (error) {
+      console.error('Error en limpieza de reservas:', error);
     }
   }
 }
