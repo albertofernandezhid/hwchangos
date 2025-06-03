@@ -1,59 +1,55 @@
-# Hwchangos
+# 🎲 Sorteo de Números Web
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.7.
+[![Angular](https://img.shields.io/badge/Angular-19-DD0031?logo=angular&logoColor=white)](https://angular.io/)
+[![Firebase](https://img.shields.io/badge/Firebase-Hosting%20%7C%20DB%20%7C%20Storage-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![GitHub](https://img.shields.io/badge/GitHub-Código%20Fuente-181717?logo=github&logoColor=white)](https://github.com/)
 
-## Development server
+Una aplicación web sencilla y sin registros para gestionar sorteos numéricos de manera automática, accesible desde cualquier dispositivo con navegador.
 
-To start a local development server, run:
+🌐 **URL de la aplicación:** [https://hwchangos.web.app/](https://hwchangos.web.app/)
 
-```bash
-ng serve
-```
+---
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## 🚀 Características principales
 
-## Code scaffolding
+### ✅ Para todos los usuarios:
+- No requiere registro.
+- Selecciona uno o varios números y asígnales tu nombre.
+- Los números seleccionados quedan **reservados durante 5 minutos**. Si no se asignan en ese tiempo, vuelven a estar disponibles.
+- Una vez asignado, un número **no puede ser reclamado por otra persona**.
+- Funciona desde cualquier navegador (móvil o PC).
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 🔐 Funcionalidades para el administrador:
+- Modificar la cantidad de casillas (desde **10 hasta 100 números**).
+- Editar el **título** y la **descripción** del sorteo.
+- Añadir **una imagen** (opcional).
+- Marcar números como **pagados**.
+- **Desasignar** números ya asignados.
+- **Resetear** el sorteo por completo.
 
-```bash
-ng generate component component-name
-```
+---
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## 🛠️ Tecnologías utilizadas
 
-```bash
-ng generate --help
-```
+- **Angular 19**: Framework principal para el desarrollo frontend.
+- **Firebase**: 
+  - **Hosting** para publicar la aplicación web.
+  - **Realtime Database** para almacenar y sincronizar los datos del sorteo.
+  - **Storage** para guardar la imagen opcional del sorteo.
+- **GitHub**: Repositorio y control de versiones del código fuente.
 
-## Building
+---
 
-To build the project run:
+## 📄 Licencia
 
-```bash
-ng build
-```
+Este proyecto es privado y no cuenta con una licencia de uso libre.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+🛑 **No está permitido copiar, modificar ni redistribuir este software sin autorización previa.**
 
-## Running unit tests
+Si deseas utilizar, adaptar o compartir este proyecto, **debes pedirme permiso explícito**.
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+Puedes contactar conmigo desde el perfil del repositorio o abriendo un issue.
 
-```bash
-ng test
-```
+---
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+⭐ Si te ha gustado este proyecto, considera dejar una estrella. ¡Gracias!
