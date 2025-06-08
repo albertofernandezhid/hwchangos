@@ -1,7 +1,7 @@
 import { Component, effect, inject, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StateService, NumberCell } from '../state.service';
-import { combineLatest, firstValueFrom, map } from 'rxjs';
+import { combineLatest, firstValueFrom, map, interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-number-grid',
@@ -15,7 +15,7 @@ export class NumberGridComponent implements OnDestroy {
   private localSelections = new Set<string>(); // Selecciones locales
   private reservationTimer?: number;
 
-  // Modificar el observable para incluir lógica de reservas y selecciones locales
+  // Observable con los números, marcando seleccionados y tempBlocked
   numbers$ = combineLatest([
     this.state.numbers$,
     this.state.cantidad$
@@ -24,9 +24,7 @@ export class NumberGridComponent implements OnDestroy {
       const now = Date.now();
       return numbers.slice(0, cantidad).map(cell => ({
         ...cell,
-        // Mostrar como seleccionado si está en selecciones locales
         selected: this.localSelections.has(cell.id || ''),
-        // Marcar como temporalmente bloqueado si está reservado por otro
         tempBlocked: cell.reservedBy && 
                     cell.reservedBy !== this.state.getSessionId() && 
                     (cell.reservedUntil || 0) > now
@@ -40,6 +38,10 @@ export class NumberGridComponent implements OnDestroy {
   selectedUnblockedExist = signal(false);
   isAdmin = signal(false);
 
+  // Contador de tiempo restante para cada celda, key = cell.id, value = string a mostrar
+  countdowns: { [key: string]: string } = {};
+  private countdownSubscription?: Subscription;
+
   constructor() {
     // Suscripción al modo admin
     this.adminMode$.subscribe((mode: boolean) => {
@@ -48,7 +50,7 @@ export class NumberGridComponent implements OnDestroy {
 
     // Limpiar reservas al cargar
     this.state.releaseAllUserReservations();
-    
+
     // Configurar limpieza automática cada minuto
     this.reservationTimer = window.setInterval(() => {
       this.cleanupExpiredReservations();
@@ -56,6 +58,11 @@ export class NumberGridComponent implements OnDestroy {
 
     // Inicializar contadores
     this.updateSelectionCounts();
+
+    // Suscripción para actualizar el tiempo restante cada segundo
+    this.countdownSubscription = interval(1000).subscribe(() => {
+      this.updateCountdowns();
+    });
   }
 
   ngOnDestroy() {
@@ -64,6 +71,10 @@ export class NumberGridComponent implements OnDestroy {
     
     if (this.reservationTimer) {
       clearInterval(this.reservationTimer);
+    }
+
+    if (this.countdownSubscription) {
+      this.countdownSubscription.unsubscribe();
     }
   }
 
@@ -170,11 +181,9 @@ export class NumberGridComponent implements OnDestroy {
   private async hasMixedSelection(newCell: any): Promise<boolean> {
     if (this.localSelections.size === 0) return false;
     
-    // Obtener los números actuales para verificar el estado de los seleccionados
     const numbers = await firstValueFrom(this.state.numbers$);
     const selectedNumbers = numbers.filter(n => this.localSelections.has(n.id || ''));
     
-    // Verificar si hay mezcla entre bloqueados y no bloqueados
     const hasBlocked = selectedNumbers.some(n => n.blocked);
     const hasUnblocked = selectedNumbers.some(n => !n.blocked);
     const newCellBlocked = newCell.blocked;
@@ -183,7 +192,6 @@ export class NumberGridComponent implements OnDestroy {
   }
 
   private async cleanupExpiredReservations() {
-    // Limpiar reservas expiradas del usuario actual
     const now = Date.now();
     const toRemove: string[] = [];
     
@@ -211,5 +219,33 @@ export class NumberGridComponent implements OnDestroy {
     } catch (error) {
       console.error('Error en limpieza de reservas:', error);
     }
+  }
+
+  // --- NUEVO MÉTODO: actualizar los tiempos restantes para mostrar ---
+  private updateCountdowns() {
+    const now = Date.now();
+    const sessionId = this.state.getSessionId();
+
+    firstValueFrom(this.state.numbers$).then(numbers => {
+      numbers.forEach(cell => {
+        const isTempBlocked =
+          cell.reservedBy &&
+          cell.reservedBy !== sessionId &&
+          (cell.reservedUntil || 0) > now;
+
+        if (isTempBlocked && cell.reservedUntil) {
+          const diff = cell.reservedUntil - now;
+          if (diff > 0) {
+            const minutes = Math.floor(diff / 1000 / 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+            this.countdowns[cell.id || ''] = `${minutes}m ${seconds}s`;
+          } else {
+            this.countdowns[cell.id || ''] = 'Reserva expirada';
+          }
+        } else {
+          this.countdowns[cell.id || ''] = '';
+        }
+      });
+    });
   }
 }

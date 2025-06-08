@@ -21,6 +21,7 @@ export interface NumberCell {
   reservedBy?: string | null;
   reservedAt?: number | null;
   reservedUntil?: number | null;
+  tempBlocked?: boolean;
 }
 
 

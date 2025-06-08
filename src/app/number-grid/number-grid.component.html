@@ -17,7 +17,7 @@
         <div>{{ cell.number }}</div>
         <div class="assigned-name" *ngIf="cell.assignedTo">{{ cell.assignedTo }}</div>
         <div class="reservation-info" *ngIf="cell.tempBlocked">
-          <small>En consideración...</small>
+          <small *ngIf="cell.id">Reservado<br>{{ countdowns[cell.id] }}</small>
         </div>
       </div>
     </div>
