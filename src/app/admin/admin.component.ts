@@ -125,13 +125,16 @@ export class AdminComponent implements OnInit {
 
   async markPaid() {
     const numbers = await firstValueFrom(this.state.numbers$);
-    this.state.markSelectedAsPaid(numbers);
+    await this.state.markSelectedAsPaid(numbers);
+    await this.state.clearSelection(numbers);
   }
 
   async unassign() {
     const numbers = await firstValueFrom(this.state.numbers$);
-    this.state.unassignSelected(numbers);
+    await this.state.unassignSelected(numbers);
+    await this.state.clearSelection(numbers);
   }
+
 
   actualizarCantidad() {
     const valor = Math.max(10, Math.min(100, this.cantidad));

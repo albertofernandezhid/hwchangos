@@ -7,7 +7,8 @@ import {
   doc,
   updateDoc,
   setDoc,
-  getDoc
+  getDoc,
+  writeBatch
 } from '@angular/fire/firestore';
 import { map } from 'rxjs/operators';
 
@@ -323,12 +324,16 @@ export class StateService {
   }
 
   async clearSelection(numbers: NumberCell[]) {
-    for (const n of numbers) {
-      if (n.selected && n.id) {
-        await this.updateNumber(n.id, { selected: false });
-      }
-    }
+    const batch = writeBatch(this.firestore);
+    numbers
+      .filter(n => n.selected)
+      .forEach(n => {
+      const docRef = doc(this.numerosCollection, n.id);
+        batch.update(docRef, { selected: false });
+      });
+    await batch.commit();
   }
+
 
   async setCantidad(valor: number) {
     const cantidad = Math.max(10, Math.min(100, valor));

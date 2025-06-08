@@ -22,12 +22,13 @@ export class NumberGridComponent implements OnDestroy {
   ]).pipe(
     map(([numbers, cantidad]) => {
       const now = Date.now();
+      const sessionId = this.state.getSessionId();
       return numbers.slice(0, cantidad).map(cell => ({
         ...cell,
         selected: this.localSelections.has(cell.id || ''),
-        tempBlocked: cell.reservedBy && 
-                    cell.reservedBy !== this.state.getSessionId() && 
-                    (cell.reservedUntil || 0) > now
+        tempBlocked: cell.reservedBy &&
+                     cell.reservedBy !== sessionId &&
+                     (cell.reservedUntil || 0) > now
       }));
     })
   );
@@ -50,6 +51,9 @@ export class NumberGridComponent implements OnDestroy {
 
     // Limpiar reservas al cargar
     this.state.releaseAllUserReservations();
+
+    // Recuperar reservas activas propias tras recarga
+    this.recoverOwnReservations();
 
     // Configurar limpieza automática cada minuto
     this.reservationTimer = window.setInterval(() => {
@@ -79,24 +83,22 @@ export class NumberGridComponent implements OnDestroy {
   }
 
   async toggleSelect(cell: any) {
-    if (cell.blocked || cell.tempBlocked) return;
+    if (!this.isAdmin() && (cell.blocked || cell.tempBlocked)) return;
     if (!this.isAdmin() && await this.hasMixedSelection(cell)) return;
 
     const cellId = cell.id || '';
     
-    if (this.localSelections.has(cellId)) {
-      // Deseleccionar: remover de selecciones locales y liberar reserva
-      this.localSelections.delete(cellId);
-      await this.state.releaseNumber(cellId);
-    } else {
-      // Seleccionar: intentar reservar primero
-      const reserved = await this.state.reserveNumber(cellId);
-      if (reserved) {
-        this.localSelections.add(cellId);
-      } else {
-        alert('Este número está siendo considerado por otro usuario. Inténtalo de nuevo en unos minutos.');
-      }
+  if (this.localSelections.has(cellId)) {
+    this.localSelections.delete(cellId);
+    await this.state.updateNumber(cellId, { selected: false });
+    await this.state.releaseNumber(cellId);
+  } else {
+    const reserved = await this.state.reserveNumber(cellId);
+    if (reserved) {
+      this.localSelections.add(cellId);
+      await this.state.updateNumber(cellId, { selected: true });
     }
+  }
     
     this.updateSelectionCounts();
   }
@@ -247,5 +249,22 @@ export class NumberGridComponent implements OnDestroy {
         }
       });
     });
+  }
+
+  // --- NUEVO MÉTODO: recuperar reservas propias tras recarga ---
+  private async recoverOwnReservations() {
+    const sessionId = this.state.getSessionId();
+    const numbers = await firstValueFrom(this.state.numbers$);
+
+    numbers.forEach(cell => {
+      if (
+        cell.reservedBy === sessionId &&
+        (cell.reservedUntil || 0) > Date.now()
+      ) {
+        this.localSelections.add(cell.id || '');
+      }
+    });
+
+    this.updateSelectionCounts();
   }
 }
