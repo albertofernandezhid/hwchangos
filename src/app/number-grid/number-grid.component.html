@@ -2,25 +2,33 @@
   <div class="grid-wrapper">
     <h2>Selecciona números para asignar</h2>
 
-    <div class="grid-container">
-      <div
-        *ngFor="let cell of (numbers$ | async)"
-        class="number-cell"
-        [class.blocked]="cell.blocked"
-        [class.selected]="cell.selected"
-        [class.paid]="cell.paid"
-        [class.temp-blocked]="cell.tempBlocked"
-        [class.reserved-by-me]="cell.reservedBy === state.getSessionId()"
-        (click)="toggleSelect(cell)"
-        [title]="getTitleForCell(cell)"
-      >
-        <div>{{ cell.number }}</div>
-        <div class="assigned-name" *ngIf="cell.assignedTo">{{ cell.assignedTo }}</div>
-        <div class="reservation-info" *ngIf="cell.tempBlocked">
-          <small *ngIf="cell.id">Reservado<br>{{ countdowns[cell.id] }}</small>
-        </div>
+  <div class="grid-container">
+    <div
+      *ngFor="let cell of (numbers$ | async)"
+      class="number-cell"
+      [class.blocked]="cell.blocked"
+      [class.selected]="cell.selected"
+      [class.paid]="cell.paid"
+      [class.temp-blocked]="cell.tempBlocked && !isAdmin()"
+      [class.reserved-by-me]="cell.reservedBy === state.getSessionId()"
+      (click)="toggleSelect(cell)"
+      [title]="getTitleForCell(cell)"
+    >
+      <div>{{ cell.number }}</div>
+      <div class="assigned-name" *ngIf="cell.assignedTo">{{ cell.assignedTo }}</div>
+      
+      <!-- Mostrar reserva a usuarios normales con countdown -->
+      <div class="reservation-info" *ngIf="cell.tempBlocked && !isAdmin()">
+        <small *ngIf="cell.id">Reservado<br>{{ countdowns[cell.id] }}</small>
+      </div>
+
+      <!-- Mostrar marca para admin cuando otro usuario tiene reservado, sin texto -->
+      <div class="admin-reserved-indicator" *ngIf="cell.tempBlocked && isAdmin()">
+        <small>🔒 Reservado por otro</small>
       </div>
     </div>
+  </div>
+
 
     <div class="button-container" *ngIf="selectedUnblockedExist()">
       <button

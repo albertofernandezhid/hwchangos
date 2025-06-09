@@ -60,19 +60,26 @@ export class StateService {
     this.numerosCollection = collection(this.firestore, 'numeros');
 
     this.numbers$ = collectionData(this.numerosCollection, { idField: 'id' }).pipe(
-      map(items =>
-        items.map(item => ({
-          id: item['id'],
-          number: item['number'],
-          assignedTo: item['assignedTo'] ?? '',
-          selected: item['selected'] ?? false,
-          blocked: item['blocked'] ?? false,
-          paid: item['paid'] ?? false,
-          reservedBy: item['reservedBy'] ?? null,
-          reservedAt: item['reservedAt'] ?? null,
-          reservedUntil: item['reservedUntil'] ?? null
-        }))
-      )
+      map(items => {
+        const now = Date.now();
+
+        return items.map(item => {
+          const reservedUntil = item['reservedUntil'] ?? null;
+          const isExpired = reservedUntil !== null && reservedUntil < now;
+
+          return {
+            id: item['id'],
+            number: item['number'],
+            assignedTo: item['assignedTo'] ?? '',
+            selected: item['selected'] ?? false,
+            blocked: item['blocked'] ?? false,
+            paid: item['paid'] ?? false,
+            reservedBy: isExpired ? null : (item['reservedBy'] ?? null),
+            reservedAt: isExpired ? null : (item['reservedAt'] ?? null),
+            reservedUntil: isExpired ? null : reservedUntil
+          };
+        });
+      })
     );
 
     this.initConfig();
@@ -312,26 +319,55 @@ export class StateService {
     }
   }
 
+  // Usar batch para marcar pagos y deseleccionar en una sola operación
   async markSelectedAsPaid(numbers: NumberCell[]) {
-    for (const n of numbers) {
-      if (n.selected && n.blocked && n.id) {
-        await this.updateNumber(n.id, {
-          paid: true,
-          selected: false
-        });
-      }
-    }
+    const batch = writeBatch(this.firestore);
+    numbers
+      .filter(n => n.selected && n.blocked && n.id)
+      .forEach(n => {
+        const docRef = doc(this.numerosCollection, n.id);
+        batch.update(docRef, { paid: true, selected: false });
+      });
+    await batch.commit();
+  }
+
+  async unmarkPaid(numbers: NumberCell[]) {
+    const batch = writeBatch(this.firestore);
+    numbers
+      .filter(n => n.selected && n.paid && n.id)
+      .forEach(n => {
+        const docRef = doc(this.numerosCollection, n.id);
+        batch.update(docRef, { paid: false, selected: false }); // deseleccionar también
+      });
+    await batch.commit();
+  }
+
+  // Puede quedar igual o eliminar unmarkPaidSelected para simplificar
+  async unmarkPaidSelected(numbers: NumberCell[]) {
+    const batch = writeBatch(this.firestore);
+    const selectedPaidNumbers = numbers.filter(n => n.selected && n.paid && n.id);
+
+    selectedPaidNumbers.forEach(n => {
+      const docRef = doc(this.numerosCollection, n.id);
+      batch.update(docRef, { paid: false, selected: false });
+    });
+
+    await batch.commit();
   }
 
   async clearSelection(numbers: NumberCell[]) {
     const batch = writeBatch(this.firestore);
+
     numbers
-      .filter(n => n.selected)
+      .filter(n => n.selected && n.id)
       .forEach(n => {
-      const docRef = doc(this.numerosCollection, n.id);
+        const docRef = doc(this.firestore, `numeros/${n.id}`);
         batch.update(docRef, { selected: false });
       });
+
     await batch.commit();
+
+    // No hace falta refresh ni delay
   }
 
 

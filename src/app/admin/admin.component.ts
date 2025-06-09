@@ -129,6 +129,13 @@ export class AdminComponent implements OnInit {
     await this.state.clearSelection(numbers);
   }
 
+  async unmarkPaid() {
+    const numbers = await firstValueFrom(this.state.numbers$);
+    await this.state.unmarkPaidSelected(numbers);
+    await this.state.clearSelection(numbers);
+  }
+
+
   async unassign() {
     const numbers = await firstValueFrom(this.state.numbers$);
     await this.state.unassignSelected(numbers);

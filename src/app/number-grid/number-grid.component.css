@@ -431,3 +431,10 @@
   color: #6b7280;
   font-style: italic;
 }
+
+.admin-reserved-indicator {
+  color: darkred;
+  font-size: 0.8em;
+  text-align: center;
+  margin-top: 4px;
+}

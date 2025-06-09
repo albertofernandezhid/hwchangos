@@ -23,13 +23,30 @@ export class NumberGridComponent implements OnDestroy {
     map(([numbers, cantidad]) => {
       const now = Date.now();
       const sessionId = this.state.getSessionId();
-      return numbers.slice(0, cantidad).map(cell => ({
-        ...cell,
-        selected: this.localSelections.has(cell.id || ''),
-        tempBlocked: cell.reservedBy &&
-                     cell.reservedBy !== sessionId &&
-                     (cell.reservedUntil || 0) > now
-      }));
+      const isAdmin = this.isAdmin();
+
+      return numbers.slice(0, cantidad).map(cell => {
+        const isSelectedLocally = this.localSelections.has(cell.id || '');
+
+        const selected =
+          isSelectedLocally &&
+          (
+            isAdmin || // el admin ve siempre su selección
+            cell.reservedBy === sessionId || // el usuario ve su propia reserva
+            (!cell.reservedBy && !cell.blocked) // también si aún está libre
+          );
+
+        const tempBlocked =
+          cell.reservedBy &&
+          cell.reservedBy !== sessionId &&
+          (cell.reservedUntil || 0) > now;
+
+        return {
+          ...cell,
+          selected,
+          tempBlocked
+        };
+      });
     })
   );
 
@@ -83,25 +100,38 @@ export class NumberGridComponent implements OnDestroy {
   }
 
   async toggleSelect(cell: any) {
-    if (!this.isAdmin() && (cell.blocked || cell.tempBlocked)) return;
-    if (!this.isAdmin() && await this.hasMixedSelection(cell)) return;
-
     const cellId = cell.id || '';
-    
-  if (this.localSelections.has(cellId)) {
-    this.localSelections.delete(cellId);
-    await this.state.updateNumber(cellId, { selected: false });
-    await this.state.releaseNumber(cellId);
-  } else {
-    const reserved = await this.state.reserveNumber(cellId);
-    if (reserved) {
-      this.localSelections.add(cellId);
-      await this.state.updateNumber(cellId, { selected: true });
+
+    if (!this.isAdmin()) {
+      // Usuarios normales: bloqueos y selección mixta
+      if (cell.blocked || cell.tempBlocked) return;
+      if (await this.hasMixedSelection(cell)) return;
+
+      if (this.localSelections.has(cellId)) {
+        this.localSelections.delete(cellId);
+        await this.state.updateNumber(cellId, { selected: false });
+        await this.state.releaseNumber(cellId);
+      } else {
+        const reserved = await this.state.reserveNumber(cellId);
+        if (reserved) {
+          this.localSelections.add(cellId);
+          await this.state.updateNumber(cellId, { selected: true });
+        }
+      }
+    } else {
+      // Admin puede seleccionar / deseleccionar siempre sin reservar ni liberar
+      if (this.localSelections.has(cellId)) {
+        this.localSelections.delete(cellId);
+        await this.state.updateNumber(cellId, { selected: false });
+      } else {
+        this.localSelections.add(cellId);
+        await this.state.updateNumber(cellId, { selected: true });
+      }
     }
-  }
-    
+
     this.updateSelectionCounts();
   }
+
 
   async assignSelected() {
     if (this.localSelections.size === 0) return;
@@ -165,12 +195,17 @@ export class NumberGridComponent implements OnDestroy {
     if (cell.blocked) {
       return `Asignado a ${cell.assignedTo}`;
     }
+
     if (cell.tempBlocked) {
-      return 'Este número está siendo considerado por otro usuario';
+      return this.isAdmin()
+        ? `Reservado por otro - ${this.countdowns[cell.id || ''] || ''}`
+        : 'Este número está siendo considerado por otro usuario';
     }
+
     if (cell.reservedBy === this.state.getSessionId()) {
       return `Número ${cell.number} - Reservado por ti`;
     }
+
     return `Número ${cell.number}`;
   }
 
@@ -230,22 +265,24 @@ export class NumberGridComponent implements OnDestroy {
 
     firstValueFrom(this.state.numbers$).then(numbers => {
       numbers.forEach(cell => {
-        const isTempBlocked =
+        const reservedByAnother =
           cell.reservedBy &&
           cell.reservedBy !== sessionId &&
           (cell.reservedUntil || 0) > now;
 
-        if (isTempBlocked && cell.reservedUntil) {
+        if (reservedByAnother && cell.reservedUntil) {
           const diff = cell.reservedUntil - now;
           if (diff > 0) {
             const minutes = Math.floor(diff / 1000 / 60);
             const seconds = Math.floor((diff / 1000) % 60);
             this.countdowns[cell.id || ''] = `${minutes}m ${seconds}s`;
           } else {
-            this.countdowns[cell.id || ''] = 'Reserva expirada';
+            this.countdowns[cell.id || ''] = '';
           }
         } else {
-          this.countdowns[cell.id || ''] = '';
+          if (this.countdowns[cell.id || '']) {
+            this.countdowns[cell.id || ''] = '';
+          }
         }
       });
     });
